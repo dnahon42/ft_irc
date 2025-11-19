@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:02:41 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/19 14:30:06 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/19 17:57:49 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <exception>
+#include <stdexcept>
 
 // Sockets
 #include <arpa/inet.h>
