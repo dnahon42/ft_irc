@@ -6,12 +6,11 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/19 13:40:18 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/20 01:43:39 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
-#include <ostream>
 
 Channel::Channel() {}
 
@@ -57,6 +56,22 @@ bool Channel::IsHasKeyOptionK() {
   if (_hasKeyOptionK)
     return (true);
   return (false);
+}
+
+void Channel::addMembers(Client *client) {
+  if (_members.size() == 1)
+    _operator.insert(client->getNickName());
+  _members[client->getNickName()] = client;
+}
+
+void Channel::removeUser(std::string &nick) {
+  MembersMap::iterator it = _members.find(nick);
+
+  if (it != _members.end()) {
+    _members.erase(it);
+    return;
+  }
+  std::cout << "error client not found" << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &os, const Channel &s) {

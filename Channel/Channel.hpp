@@ -6,17 +6,23 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/19 13:39:26 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/20 01:43:59 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANELL_HPP
 #define CHANELL_HPP
 
+#include "../Client/Client.hpp"
+#include <iostream>
 #include <map>
 #include <ostream>
+#include <set>
 #include <string>
 class Client;
+
+typedef std::map<std::string, Client *> MembersMap;
+typedef std::set<std::string> OperatorMap;
 class Channel {
 private:
   std::string _name;
@@ -31,7 +37,8 @@ private:
   bool _inviteOnly;
   bool _topicRestricted;
   bool _hasKeyOptionK;
-  std::map<Client *, bool> _members;
+  MembersMap _members;
+  OperatorMap _operator;
 
 public:
   Channel();
@@ -50,6 +57,12 @@ public:
   bool IsInviteOnly();
   bool IsTopicRestricted();
   bool IsHasKeyOptionK();
+
+  void addMembers(Client *client);
+  void invitMembers(Client *client);
+  bool isOperator(const Client &client) const;
+  void removeUser(std::string &nick);
 };
 #endif
+typedef std::map<std::string, Client *> MembersMap;
 std::ostream &operator<<(std::ostream &os, const Channel &s);
