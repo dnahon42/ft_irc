@@ -6,27 +6,13 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:02:41 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/19 17:57:49 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/20 11:49:15 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <exception>
-#include <stdexcept>
-
-// Sockets
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <unistd.h>
-
-// Errno
-#include <cerrno>
-#include <cstring>
+#include "../common/Utils.hpp"
 
 class Socket
 {

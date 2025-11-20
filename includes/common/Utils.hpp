@@ -6,23 +6,35 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:03:39 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/18 15:03:45 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/20 11:48:42 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <string>
+// Standard C++
+#include <exception>
+#include <iostream>
+#include <map>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // Sockets
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <sys/socket.h>
 #include <unistd.h>
+
+// Errno
+#include <cerrno>
+#include <cstring>
+
+// Signaux
+#include <signal.h>
 
 // Time
 #include <ctime>
-
