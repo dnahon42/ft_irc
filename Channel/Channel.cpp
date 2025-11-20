@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/20 17:36:49 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/21 02:07:24 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,21 +58,30 @@ bool Channel::IsHasKeyOptionK() {
   return (false);
 }
 
-void Channel::addMember(Client *client) {
-  if (_members.size() == 0) {
+Channel::MemberAdd Channel::addMember(Client *client) {
+  MembersMap::iterator it = _members.find(client->getNickName());
+
+  if (it != _members.end())
+    return (ALREADY_MEMBER);
+
+  else if (_members.size() == 0) {
     _operator.insert(client->getNickName());
+    _members[client->getNickName()] = client;
+    return (OPERATOR_VIA_MEMBER_ADD);
+  } else {
+    _members[client->getNickName()] = client;
+    return (MEMBER_OK);
   }
-  _members[client->getNickName()] = client;
 }
 
-void Channel::removeMember(std::string &nick) {
+Channel::MembRemove Channel::removeMember(std::string &nick) {
   MembersMap::iterator it = _members.find(nick);
 
   if (it != _members.end()) {
     _members.erase(it);
-    return;
+    return (MEMB_REMOVE_OK);
   }
-  std::cout << "error client not found" << std::endl;
+  return (MEMB_REMOVE_NOT_FOUND);
 }
 
 bool Channel::isOperator(const Client &c) {
@@ -87,16 +96,46 @@ bool Channel::isMember(const Client &c) {
   return (false);
 }
 
-void Channel::addOperator(Client *client) {
-  _operator.insert(client->getNickName());
+Channel::OperatorAdd Channel::addOperator(Client *client) {
+  if (isOperator(*client) == true)
+    return (ALREADY_OPERATOR);
+  else {
+    _operator.insert(client->getNickName());
+    return (OPERATOR_OK);
+  }
+  return (OPERATOR_NOT_FOUND);
 }
 
-void Channel::removeOperator(Client *client) {
+Channel::OperatorRemove Channel::removeOperator(Client *client) {
   if (isOperator(*client) == true) {
     _operator.erase(_operator.find(client->getUserName()));
-    return;
+    return (OPERATOR_REMOVE_OK);
   }
-  std::cout << "error operator not found" << std::endl;
+  return (OPERATOR_REMOVE_NOT_FOUND);
+}
+
+Channel::InvitedStatus Channel::addInvit(Client *client) {
+
+  listInvit::iterator it = _listInvit.find(client->getUserName());
+
+  if (it != _listInvit.end())
+    return (INVITE_ALREADY);
+  else {
+    _listInvit.insert(client->getNickName());
+    return (INVIT_OK);
+  }
+  return (INVITE_NOT_FOUND);
+}
+
+Channel::RemoveInvit Channel::removeInvit(std::string &nick) {
+
+  listInvit::iterator it = _listInvit.find(nick);
+
+  if (it != _listInvit.end()) {
+    _listInvit.erase(it);
+    return REMOVE_OK;
+  }
+  return REMOVE_NOT_FOUND;
 }
 
 std::ostream &operator<<(std::ostream &os, const Channel &s) {

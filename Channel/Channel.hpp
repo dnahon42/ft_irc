@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/20 17:21:15 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/21 02:21:10 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Client;
 
 typedef std::map<std::string, Client *> MembersMap;
 typedef std::set<std::string> OperatorMap;
+typedef std::set<std::string> listInvit;
 class Channel {
 private:
   std::string _name;
@@ -41,6 +42,7 @@ private:
   bool _hasKeyOptionK;
   MembersMap _members;
   OperatorMap _operator;
+  listInvit _listInvit;
 
 public:
   Channel();
@@ -59,14 +61,27 @@ public:
   bool IsInviteOnly();
   bool IsTopicRestricted();
   bool IsHasKeyOptionK();
-
-  void addMember(Client *client);
-  void invitMember(Client *client);
-  void removeMember(std::string &nick);
   bool isOperator(const Client &c);
   bool isMember(const Client &c);
-  void removeOperator(Client *client);
-  void addOperator(Client *client);
+
+  enum MemberAdd {
+    OPERATOR_VIA_MEMBER_ADD,
+    MEMBER_OK,
+    ALREADY_MEMBER,
+    MEMBER_NOT_FOUND
+  };
+  enum OperatorAdd { OPERATOR_OK, ALREADY_OPERATOR, OPERATOR_NOT_FOUND };
+  enum OperatorRemove { OPERATOR_REMOVE_OK, OPERATOR_REMOVE_NOT_FOUND };
+  enum InvitedStatus { INVIT_OK, INVITE_ALREADY, INVITE_NOT_FOUND };
+  enum RemoveInvit { REMOVE_OK, REMOVE_NOT_FOUND };
+  enum MembRemove { MEMB_REMOVE_OK, MEMB_REMOVE_NOT_FOUND };
+  RemoveInvit removeInvit(std::string &nick);
+  InvitedStatus isInvited(std::string &nick);
+  OperatorAdd addOperator(Client *client);
+  InvitedStatus addInvit(Client *client);
+  OperatorRemove removeOperator(Client *client);
+  MemberAdd addMember(Client *client);
+  MembRemove removeMember(std::string &nick);
 };
 std::ostream &operator<<(std::ostream &os, const Channel &s);
 #endif
