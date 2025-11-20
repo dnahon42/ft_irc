@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/20 01:43:59 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/20 17:21:15 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,9 @@ private:
 
   std::string _key;
   int _userLimit;
-  bool hasKey;
+  bool _isOperator;
+  bool _isClient;
+  bool _hasKey;
   bool _limitSet;
   bool _inviteOnly;
   bool _topicRestricted;
@@ -58,11 +60,13 @@ public:
   bool IsTopicRestricted();
   bool IsHasKeyOptionK();
 
-  void addMembers(Client *client);
-  void invitMembers(Client *client);
-  bool isOperator(const Client &client) const;
-  void removeUser(std::string &nick);
+  void addMember(Client *client);
+  void invitMember(Client *client);
+  void removeMember(std::string &nick);
+  bool isOperator(const Client &c);
+  bool isMember(const Client &c);
+  void removeOperator(Client *client);
+  void addOperator(Client *client);
 };
-#endif
-typedef std::map<std::string, Client *> MembersMap;
 std::ostream &operator<<(std::ostream &os, const Channel &s);
+#endif
