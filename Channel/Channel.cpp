@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/21 15:57:10 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 01:05:18 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,35 +28,17 @@ std::string Channel::getKey() const { return (_key); }
 
 int Channel::getUserLimit() const { return (_userLimit); }
 
-bool Channel::IsHasKey() {
-  if (_hasKey)
-    return (true);
-  return (false);
-}
+bool Channel::IsHasKey() { return (_hasKey); }
 
-bool Channel::IsLimitSet() {
-  if (_limitSet)
-    return (true);
-  return (false);
-}
+bool Channel::IsLimitSet() { return (_limitSet); }
 
-bool Channel::IsInviteOnly() {
-  if (_inviteOnly)
-    return (true);
-  return (false);
-}
+bool Channel::IsInviteOnly() { return (_inviteOnly); }
 
-bool Channel::IsTopicRestricted() {
-  if (_topicRestricted)
-    return (true);
-  return (false);
-}
+bool Channel::IsTopicRestricted() { return (_topicRestricted); }
 
-bool Channel::IsHasKeyOptionK() {
-  if (_hasKeyOptionK)
-    return (true);
-  return (false);
-}
+bool Channel::IsHasKeyOptionK() { return (_hasKeyOptionK); }
+
+bool Channel::isPrivate() const { return (_isPrivate); }
 
 bool Channel::isOperator(const Client &c) {
   if (_operator.find(c.getUserName()) != _operator.end())
@@ -69,24 +51,22 @@ bool Channel::isMember(const Client &c) {
     return (true);
   return (false);
 }
+void Channel::setAuthor(std::string newAuthor) { _topicAuthor = newAuthor; }
 
-Channel::MemberStatus Channel::addMember(Client *client) {
-  MembersMap::iterator it = _members.find(client->getNickName());
+void Channel::setMsgTopic(std::string newTopic) { _topic = newTopic; }
 
-  if (it != _members.end())
-    return (MEMBER_ALREADY);
+Channel::TopicStatus Channel::setTopic(Client *client,
+                                       const std::string &newTopic) {
+  if (IsTopicRestricted() == true && isOperator(*client) == false)
+    return TOPIC_NEED_OP;
 
-  else if (_members.size() == 0) {
-    _operator.insert(client->getNickName());
-    _members[client->getNickName()] = client;
-    return (MEMBER_OP_AUTOPROMOTE);
-  } else {
-    _members[client->getNickName()] = client;
-    return (MEMBER_OK);
-  }
-  return (MEMBER_NOT_FOUND);
+  if (newTopic.empty())
+    return TOPIC_EMPTY;
+
+  setMsgTopic(newTopic);
+  setAuthor(client->getNickName());
+  return TOPIC_OK;
 }
-
 Channel::MemberStatus Channel::removeMember(std::string &nick) {
   MembersMap::iterator it = _members.find(nick);
 

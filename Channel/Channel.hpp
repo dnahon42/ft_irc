@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/21 14:44:12 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 00:50:10 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ private:
 
   std::string _key;
   int _userLimit;
-  bool _isOperator;
-  bool _isClient;
+  bool _isPrivate;
   bool _hasKey;
   bool _limitSet;
   bool _inviteOnly;
@@ -56,6 +55,7 @@ public:
   std::string getKey() const;
   int getUserLimit() const;
 
+  // Implémentation des modes
   bool IsHasKey();
   bool IsLimitSet();
   bool IsInviteOnly();
@@ -63,7 +63,13 @@ public:
   bool IsHasKeyOptionK();
   bool isOperator(const Client &c);
   bool isMember(const Client &c);
-
+  bool isPrivate() const;
+  void setPrivate(bool status);
+  void setAuthor(std::string newAuthor);
+  void setMsgTopic(std::string newTopic);
+  enum TopicStatus { TOPIC_OK, TOPIC_NEED_OP, TOPIC_EMPTY };
+  TopicStatus setTopic(Client *client, const std::string &newTopic);
+  // [Channel] Structure interne du Channel (variables + getters/setters
   enum MemberStatus {
     MEMBER_OP_AUTOPROMOTE,
     MEMBER_OK,
