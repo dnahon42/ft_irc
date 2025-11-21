@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/21 02:21:10 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/21 14:44:12 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,24 +64,28 @@ public:
   bool isOperator(const Client &c);
   bool isMember(const Client &c);
 
-  enum MemberAdd {
-    OPERATOR_VIA_MEMBER_ADD,
+  enum MemberStatus {
+    MEMBER_OP_AUTOPROMOTE,
     MEMBER_OK,
-    ALREADY_MEMBER,
+    MEMBER_ALREADY,
     MEMBER_NOT_FOUND
   };
-  enum OperatorAdd { OPERATOR_OK, ALREADY_OPERATOR, OPERATOR_NOT_FOUND };
-  enum OperatorRemove { OPERATOR_REMOVE_OK, OPERATOR_REMOVE_NOT_FOUND };
-  enum InvitedStatus { INVIT_OK, INVITE_ALREADY, INVITE_NOT_FOUND };
-  enum RemoveInvit { REMOVE_OK, REMOVE_NOT_FOUND };
+  enum OperatorStatus { OP_OK, OP_ALREADY, OP_NOT_FOUND, OP_NOT_MEMBER };
+  enum InvitedStatus {
+    REMOVE_INVIT_NOT_FOUND,
+    REMOVE_INVIT_OK,
+    INVIT_OK,
+    INVITE_ALREADY,
+    INVITE_NOT_FOUND
+  };
   enum MembRemove { MEMB_REMOVE_OK, MEMB_REMOVE_NOT_FOUND };
-  RemoveInvit removeInvit(std::string &nick);
+  InvitedStatus removeInvit(std::string &nick);
   InvitedStatus isInvited(std::string &nick);
-  OperatorAdd addOperator(Client *client);
   InvitedStatus addInvit(Client *client);
-  OperatorRemove removeOperator(Client *client);
-  MemberAdd addMember(Client *client);
-  MembRemove removeMember(std::string &nick);
+  OperatorStatus addOperator(Client *client);
+  OperatorStatus removeOperator(Client *client);
+  MemberStatus addMember(Client *client);
+  MemberStatus removeMember(std::string &nick);
 };
 std::ostream &operator<<(std::ostream &os, const Channel &s);
 #endif
