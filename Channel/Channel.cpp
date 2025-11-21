@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/21 14:46:45 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/21 15:57:10 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,5 +143,9 @@ Channel::InvitedStatus Channel::removeInvit(std::string &nick) {
 
 std::ostream &operator<<(std::ostream &os, const Channel &s) {
   os << s.getName();
+  os << s.getKey();
+  os << s.getTopic();
+  os << s.getUserLimit();
+  os << s.getTopicTimesStamp();
   return (os);
 }
