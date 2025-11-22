@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:02:41 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/20 11:49:15 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/21 19:59:46 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Socket
 	int getFd() const;
 	int getPort() const;
 	const struct sockaddr_in &getAddress() const;
+	struct sockaddr_in &getAddress();
 
 	std::string getIpString() const;
 };

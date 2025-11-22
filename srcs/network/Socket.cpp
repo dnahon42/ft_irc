@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:43:53 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/20 11:57:09 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/21 19:59:56 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,6 +199,11 @@ int Socket::getPort(void) const
 }
 
 const struct sockaddr_in &Socket::getAddress() const
+{
+	return (_address);
+}
+
+struct sockaddr_in &Socket::getAddress()
 {
 	return (_address);
 }
