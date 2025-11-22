@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:56:42 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/22 02:52:09 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/22 05:10:15 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ class Server
 	bool createListenSocket();
 	void acceptNewConnections();
 
-	/* I/O helpers (implemented in Server_io.cpp) */
 	void handleReadable(int fd, Connection *conn);
 	void handleWritable(int fd, Connection *conn);
 
