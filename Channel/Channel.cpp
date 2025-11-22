@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/22 01:05:18 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 23:51:32 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,7 @@ bool Channel::IsInviteOnly() { return (_inviteOnly); }
 
 bool Channel::IsTopicRestricted() { return (_topicRestricted); }
 
-bool Channel::IsHasKeyOptionK() { return (_hasKeyOptionK); }
-
+bool Channel::OptionK() { return (_hasOptionK); }
 bool Channel::isPrivate() const { return (_isPrivate); }
 
 bool Channel::isOperator(const Client &c) {
@@ -67,6 +66,91 @@ Channel::TopicStatus Channel::setTopic(Client *client,
   setAuthor(client->getNickName());
   return TOPIC_OK;
 }
+
+bool Channel::setBoolPass() { return (_hasPassword); }
+
+std::string Channel::getPassword() const { return (_passWord); }
+
+Channel::ModeStatus Channel::setPassword(Client *client,
+                                         std::string &password) {
+  if (isOperator(*client)) {
+    if (password.empty())
+      return (PASS_EMPTY);
+    _passWord = password;
+    _hasPassword = true;
+    return (PASS_SET_OK);
+  }
+  return (NOT_OPERATOR);
+}
+Channel::ModeStatus Channel::clearPassword(Client *client) {
+
+  if (!isOperator(*client))
+    return (NOT_OPERATOR);
+  if (!OptionK())
+    return (PASS_ACTIVED);
+  _passWord = "";
+  _hasPassword = false;
+  return (PASS_CLEAR);
+}
+
+Channel::LimitStatus Channel::setLimit(Client *client, int limit) {
+  if (!isOperator(*client))
+    return (LIMIT_NOT_OP);
+  if (limit <= 0)
+    return (LIMIT_INVALID);
+  _userLimit = limit;
+  _limitSet = true;
+  return (LIMIT_SET_OK);
+}
+
+Channel::LimitStatus Channel::clearLimit(Client *client) {
+  if (!isOperator(*client))
+    return (LIMIT_NOT_OP);
+  if (!IsLimitSet())
+    return (LIMIT_NOT_SET);
+  _userLimit = 0;
+  _limitSet = false;
+  return (LIMIT_UNSET_OK);
+}
+
+Channel::JoinStatus Channel::canJoin(Client *client,
+                                     const std::string &password) {
+  if (OptionK() == true) {
+    if (password.empty())
+      return (PASSWORD_EMPTY);
+    if (password != getPassword())
+      return (PASSWORD_INCORECT);
+    return (PASSWORD_OK);
+  }
+}
+
+Channel::OperatorStatus Channel::clearOperator(Client *client,
+                                               std::string &nick) {
+  OperatorMap::iterator i = _operator.find(nick);
+
+  if (!isOperator(*client))
+    return (OP_NOT_FOUND);
+  if (i == _operator.end()) {
+    return (OP_NOT_OP);
+  }
+  _operator.erase(i);
+  return (OP_NOT_MEMBER);
+}
+
+Channel::OperatorStatus Channel::setOperator(Client *client,
+                                             std::string &nick) {
+  MembersMap::iterator it = _members.find(nick);
+  OperatorMap::iterator i = _operator.find(nick);
+  if (!isOperator(*client))
+    return (OP_NOT_FOUND);
+  if (it == _members.end())
+    return (OP_NOT_MEMBER);
+  if (i != _operator.end())
+    return (OP_ALREADY);
+  _operator.insert(nick);
+  return (OP_OK);
+}
+
 Channel::MemberStatus Channel::removeMember(std::string &nick) {
   MembersMap::iterator it = _members.find(nick);
 

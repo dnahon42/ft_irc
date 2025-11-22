@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/22 00:50:10 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 23:50:57 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ private:
   std::string _topic;
   std::string _topicAuthor;
   time_t _topicTimestamp;
-
+  std::string _passWord;
   std::string _key;
   int _userLimit;
   bool _isPrivate;
@@ -38,7 +38,8 @@ private:
   bool _limitSet;
   bool _inviteOnly;
   bool _topicRestricted;
-  bool _hasKeyOptionK;
+  bool _hasPassword;
+  bool _hasOptionK;
   MembersMap _members;
   OperatorMap _operator;
   listInvit _listInvit;
@@ -60,7 +61,7 @@ public:
   bool IsLimitSet();
   bool IsInviteOnly();
   bool IsTopicRestricted();
-  bool IsHasKeyOptionK();
+  bool OptionK();
   bool isOperator(const Client &c);
   bool isMember(const Client &c);
   bool isPrivate() const;
@@ -69,6 +70,28 @@ public:
   void setMsgTopic(std::string newTopic);
   enum TopicStatus { TOPIC_OK, TOPIC_NEED_OP, TOPIC_EMPTY };
   TopicStatus setTopic(Client *client, const std::string &newTopic);
+  enum JoinStatus { PASSWORD_EMPTY, PASSWORD_OK, PASSWORD_INCORECT, NOT_OP };
+  enum ModeStatus {
+    PASS_ACTIVED,
+    PASS_CLEAR,
+    PASS_SET_OK,
+    NOT_OPERATOR,
+    PASS_EMPTY
+  };
+  ModeStatus setPassword(Client *client, std::string &password);
+  std::string getPassword() const;
+  bool setBoolPass();
+  ModeStatus clearPassword(Client *client);
+  JoinStatus canJoin(Client *client, const std::string &password);
+  enum LimitStatus {
+    LIMIT_UNSET_OK,
+    LIMIT_SET_OK,
+    LIMIT_NOT_OP,
+    LIMIT_NOT_SET,
+    LIMIT_INVALID
+  };
+  LimitStatus clearLimit(Client *client);
+  LimitStatus setLimit(Client *client, int limit);
   // [Channel] Structure interne du Channel (variables + getters/setters
   enum MemberStatus {
     MEMBER_OP_AUTOPROMOTE,
@@ -76,7 +99,17 @@ public:
     MEMBER_ALREADY,
     MEMBER_NOT_FOUND
   };
-  enum OperatorStatus { OP_OK, OP_ALREADY, OP_NOT_FOUND, OP_NOT_MEMBER };
+  enum OperatorStatus {
+    NOT_MEMBER,
+    OP_OK,
+    OP_ALREADY,
+    OP_NOT_FOUND,
+    OP_REMOVE_OK,
+    OP_NOT_OP,
+    OP_NOT_MEMBER
+  };
+  OperatorStatus clearOperator(Client *client, std::string &nick);
+  OperatorStatus setOperator(Client *client, std::string &nick);
   enum InvitedStatus {
     REMOVE_INVIT_NOT_FOUND,
     REMOVE_INVIT_OK,

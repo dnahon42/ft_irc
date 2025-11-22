@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 00:24:21 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/20 17:37:37 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 20:25:47 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ std::string Client::getNickName() const { return (_nickName); }
 std::string Client::getHostName() const { return (_hostName); }
 
 std::string Client::getUserName() const { return (_userName); }
-
+stdd::string Client::getPassword() const { return (_password); }
 void Client::setNickName(std::string nickName) { _nickName = nickName; }
 
 void Client::setHostName(std::string HostName) { _hostName = HostName; }
