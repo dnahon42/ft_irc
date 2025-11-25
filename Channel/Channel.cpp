@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/22 23:51:32 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/25 19:00:56 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,111 @@ Channel::JoinStatus Channel::canJoin(Client *client,
   }
 }
 
+void Channel::setTopicBool(bool status) { _topicRestricted = status; }
+
+Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
+                                      std::string &param) {
+  if (sign != '-' && sign != '+')
+    return INVALID_SIGN;
+
+  if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'l' && mode != 'o')
+    return UNKNOW_MODE;
+
+  if ((mode == 'i' || mode == 't') && !param.empty())
+    return PARAM_NOT_ALLOWED;
+
+  if (sign == '+' && (mode == 'k' || mode == 'l' || mode == 'o') &&
+      param.empty())
+    return PARAM_REQUIRED;
+
+  if (sign == '-' && mode == 'o' && param.empty())
+    return PARAM_REQUIRED;
+
+  if (sign == '-' && (mode == 'k' || mode == 'l') && !param.empty())
+    return PARAM_NOT_ALLOWED;
+
+  if (sign == '+') {
+    switch (mode) {
+
+    case 'i':
+      setPrivate(true);
+      return MODE_OK;
+
+    case 't':
+      setTopicBool(true);
+      return MODE_OK;
+
+    case 'k':
+      return setPassword(client, param);
+
+    case 'o': {
+      OperatorStatus st = setOperator(client, param);
+      if (st == OP_OK)
+        return MODE_OK;
+      if (st == OP_NOT_FOUND)
+        return NOT_OPERATOR;
+      if (st == OP_ALREADY)
+        return ALREADY_OP;
+      if (st == OP_NOT_MEMBER)
+        return MEMBER_NOT;
+      return UNKNOW_MODE;
+    }
+
+    case 'l': {
+      int limit = atoi(param.c_str());
+      LimitStatus st = setLimit(client, limit);
+      if (st == LIMIT_SET_OK)
+        return MODE_OK;
+      if (st == LIMIT_INVALID)
+        return INVALID_LIMIT;
+      if (st == LIMIT_NOT_OP)
+        return NOT_OPERATOR;
+      return UNKNOW_MODE;
+    }
+    }
+  }
+
+  if (sign == '-') {
+    switch (mode) {
+
+    case 'i':
+      setPrivate(false);
+      return MODE_OK;
+
+    case 't':
+      setTopicBool(false);
+      return MODE_OK;
+
+    case 'k':
+      return clearPassword(client);
+
+    case 'o': {
+      OperatorStatus st = clearOperator(client, param);
+      if (st == OP_OK)
+        return MODE_OK;
+      if (st == OP_NOT_FOUND)
+        return CLIENT_NOT_OP;
+      if (st == OP_NOT_OP)
+        return NOT_OPERATOR;
+      return UNKNOW_MODE;
+    }
+
+    case 'l': {
+      LimitStatus st = clearLimit(client);
+      if (st == LIMIT_UNSET_OK)
+        return MODE_OK;
+      if (st == LIMIT_NOT_OP)
+        return NOT_OPERATOR;
+      if (st == LIMIT_NOT_SET)
+        return MODE_NOT_ACTIVED;
+      return UNKNOW_MODE;
+    }
+    }
+  }
+
+  return MODE_OK;
+}
+
 Channel::OperatorStatus Channel::clearOperator(Client *client,
                                                std::string &nick) {
   OperatorMap::iterator i = _operator.find(nick);
@@ -134,7 +239,7 @@ Channel::OperatorStatus Channel::clearOperator(Client *client,
     return (OP_NOT_OP);
   }
   _operator.erase(i);
-  return (OP_NOT_MEMBER);
+  return (OP_OK);
 }
 
 Channel::OperatorStatus Channel::setOperator(Client *client,

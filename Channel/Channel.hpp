@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/22 23:50:57 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/25 18:51:15 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ public:
   void setPrivate(bool status);
   void setAuthor(std::string newAuthor);
   void setMsgTopic(std::string newTopic);
+  void setTopicBool(bool status);
   enum TopicStatus { TOPIC_OK, TOPIC_NEED_OP, TOPIC_EMPTY };
   TopicStatus setTopic(Client *client, const std::string &newTopic);
   enum JoinStatus { PASSWORD_EMPTY, PASSWORD_OK, PASSWORD_INCORECT, NOT_OP };
@@ -76,13 +77,25 @@ public:
     PASS_CLEAR,
     PASS_SET_OK,
     NOT_OPERATOR,
-    PASS_EMPTY
+    PASS_EMPTY,
+    UNKNOW_MODE,
+    PARAM_EMPTY,
+    PARAM_NOT_ALLOWED,
+    PARAM_REQUIRED,
+    INVALID_SIGN,
+    MEMBER_NOT,
+    MODE_OK,
+    ALREADY_OP,
+    INVALID_LIMIT,
+    CLIENT_NOT_OP,
+    MODE_NOT_ACTIVED
   };
   ModeStatus setPassword(Client *client, std::string &password);
   std::string getPassword() const;
   bool setBoolPass();
   ModeStatus clearPassword(Client *client);
   JoinStatus canJoin(Client *client, const std::string &password);
+  ModeStatus applyMod(Client *client, char sign, char mode, std::string &param);
   enum LimitStatus {
     LIMIT_UNSET_OK,
     LIMIT_SET_OK,
