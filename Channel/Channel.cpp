@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/25 19:00:56 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/26 17:11:35 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,13 +115,26 @@ Channel::LimitStatus Channel::clearLimit(Client *client) {
 
 Channel::JoinStatus Channel::canJoin(Client *client,
                                      const std::string &password) {
-  if (OptionK() == true) {
-    if (password.empty())
-      return (PASSWORD_EMPTY);
-    if (password != getPassword())
-      return (PASSWORD_INCORECT);
-    return (PASSWORD_OK);
+
+  if (isMember(*client))
+    return ALREADY_MEMB;
+
+  if (_inviteOnly) {
+    if (_listInvit.find(client->getUserName()) == _listInvit.end())
+      return INVIT_REQUIRED;
   }
+
+  if (OptionK()) {
+    if (password.empty())
+      return PASSWORD_EMPTY;
+    if (password != getPassword())
+      return PASSWORD_INCORECT;
+  }
+
+  if (_limitSet && _memberCount >= _userLimit)
+    return FULL_CHANNEL;
+
+  return JOIN_OK;
 }
 
 void Channel::setTopicBool(bool status) { _topicRestricted = status; }

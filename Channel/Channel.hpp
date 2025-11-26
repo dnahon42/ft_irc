@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/25 18:51:15 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/26 17:24:09 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ private:
   time_t _topicTimestamp;
   std::string _passWord;
   std::string _key;
+
+  int _memberCount;
   int _userLimit;
   bool _isPrivate;
   bool _hasKey;
@@ -71,7 +73,16 @@ public:
   void setTopicBool(bool status);
   enum TopicStatus { TOPIC_OK, TOPIC_NEED_OP, TOPIC_EMPTY };
   TopicStatus setTopic(Client *client, const std::string &newTopic);
-  enum JoinStatus { PASSWORD_EMPTY, PASSWORD_OK, PASSWORD_INCORECT, NOT_OP };
+  enum JoinStatus {
+    ALREADY_MEMB,
+    PASSWORD_EMPTY,
+    PASSWORD_OK,
+    PASSWORD_INCORECT,
+    NOT_OP,
+    INVIT_REQUIRED,
+    FULL_CHANNEL,
+    JOIN_OK
+  };
   enum ModeStatus {
     PASS_ACTIVED,
     PASS_CLEAR,
