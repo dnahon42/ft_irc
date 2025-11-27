@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/26 17:11:35 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/27 13:20:06 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,9 +242,19 @@ Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
   return MODE_OK;
 }
 
+void Channel::applyJoin(Client *client) {
+
+  addMember(client);
+  _memberCount++;
+  if (_isPrivate == true) {
+    listInvit::iterator i = _listInvit.find(client->getNickName());
+    if (i != _listInvit.end())
+      _listInvit.erase(client->getNickName());
+  }
+}
 Channel::OperatorStatus Channel::clearOperator(Client *client,
                                                std::string &nick) {
-  OperatorMap::iterator i = _operator.find(nick);
+  OperatorMap::iterator i = _operator.find(client->getNickName());
 
   if (!isOperator(*client))
     return (OP_NOT_FOUND);
@@ -267,6 +277,22 @@ Channel::OperatorStatus Channel::setOperator(Client *client,
     return (OP_ALREADY);
   _operator.insert(nick);
   return (OP_OK);
+}
+
+Channel::MemberStatus Channel::addMember(Client *client) {
+  MembersMap::iterator it = _members.find(client->getNickName());
+
+  if (it != _members.end())
+    return (MEMBER_ALREADY);
+
+  else if (_members.size() == 0) {
+    _operator.insert(client->getNickName());
+    _members[client->getNickName()] = client;
+    return (MEMBER_OP_AUTOPROMOTE);
+  } else {
+    _members[client->getNickName()] = client;
+    return (MEMBER_OK);
+  }
 }
 
 Channel::MemberStatus Channel::removeMember(std::string &nick) {

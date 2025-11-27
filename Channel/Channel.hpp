@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/26 17:24:09 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/27 10:56:07 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ public:
   ModeStatus clearPassword(Client *client);
   JoinStatus canJoin(Client *client, const std::string &password);
   ModeStatus applyMod(Client *client, char sign, char mode, std::string &param);
+  void applyJoin(Client *client);
   enum LimitStatus {
     LIMIT_UNSET_OK,
     LIMIT_SET_OK,
