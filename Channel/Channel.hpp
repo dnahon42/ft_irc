@@ -19,11 +19,13 @@
 #include <ostream>
 #include <set>
 #include <string>
+
 class Client;
 
 typedef std::map<std::string, Client *> MembersMap;
 typedef std::set<std::string> OperatorMap;
 typedef std::set<std::string> listInvit;
+
 class Channel {
 private:
   std::string _name;
@@ -53,12 +55,15 @@ public:
   std::string getName() const;
   std::string getTopic() const;
   std::string getTopicAuthor() const;
+  std::string getKey() const;
+  std::string getPassword() const;
 
   time_t getTopicTimesStamp() const;
-  std::string getKey() const;
+  
   int getUserLimit() const;
+  
+  void applyJoin(Client *client);
 
-  // Implémentation des modes
   bool IsHasKey();
   bool IsLimitSet();
   bool IsInviteOnly();
@@ -71,8 +76,10 @@ public:
   void setAuthor(std::string newAuthor);
   void setMsgTopic(std::string newTopic);
   void setTopicBool(bool status);
+  bool setBoolPass();
+
   enum TopicStatus { TOPIC_OK, TOPIC_NEED_OP, TOPIC_EMPTY };
-  TopicStatus setTopic(Client *client, const std::string &newTopic);
+  enum MembRemove { MEMB_REMOVE_OK, MEMB_REMOVE_NOT_FOUND };
   enum JoinStatus {
     ALREADY_MEMB,
     PASSWORD_EMPTY,
@@ -101,23 +108,6 @@ public:
     CLIENT_NOT_OP,
     MODE_NOT_ACTIVED
   };
-  ModeStatus setPassword(Client *client, std::string &password);
-  std::string getPassword() const;
-  bool setBoolPass();
-  ModeStatus clearPassword(Client *client);
-  JoinStatus canJoin(Client *client, const std::string &password);
-  ModeStatus applyMod(Client *client, char sign, char mode, std::string &param);
-  void applyJoin(Client *client);
-  enum LimitStatus {
-    LIMIT_UNSET_OK,
-    LIMIT_SET_OK,
-    LIMIT_NOT_OP,
-    LIMIT_NOT_SET,
-    LIMIT_INVALID
-  };
-  LimitStatus clearLimit(Client *client);
-  LimitStatus setLimit(Client *client, int limit);
-  // [Channel] Structure interne du Channel (variables + getters/setters
   enum MemberStatus {
     MEMBER_OP_AUTOPROMOTE,
     MEMBER_OK,
@@ -133,8 +123,13 @@ public:
     OP_NOT_OP,
     OP_NOT_MEMBER
   };
-  OperatorStatus clearOperator(Client *client, std::string &nick);
-  OperatorStatus setOperator(Client *client, std::string &nick);
+  enum LimitStatus {
+    LIMIT_UNSET_OK,
+    LIMIT_SET_OK,
+    LIMIT_NOT_OP,
+    LIMIT_NOT_SET,
+    LIMIT_INVALID
+  };
   enum InvitedStatus {
     REMOVE_INVIT_NOT_FOUND,
     REMOVE_INVIT_OK,
@@ -142,12 +137,28 @@ public:
     INVITE_ALREADY,
     INVITE_NOT_FOUND
   };
-  enum MembRemove { MEMB_REMOVE_OK, MEMB_REMOVE_NOT_FOUND };
+ 
+  ModeStatus setPassword(Client *client, std::string &password);
+  ModeStatus clearPassword(Client *client);
+  ModeStatus applyMod(Client *client, char sign, char mode, std::string &param);
+
+  JoinStatus canJoin(Client *client, const std::string &password);
+
+  TopicStatus setTopic(Client *client, const std::string &newTopic);
+
+  LimitStatus clearLimit(Client *client);
+  LimitStatus setLimit(Client *client, int limit);
+
+  OperatorStatus clearOperator(Client *client, std::string &nick);
+  OperatorStatus setOperator(Client *client, std::string &nick);
+
   InvitedStatus removeInvit(std::string &nick);
   InvitedStatus isInvited(std::string &nick);
   InvitedStatus addInvit(Client *client);
+
   OperatorStatus addOperator(Client *client);
   OperatorStatus removeOperator(Client *client);
+
   MemberStatus addMember(Client *client);
   MemberStatus removeMember(std::string &nick);
 };
