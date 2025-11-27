@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 23:59:13 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/20 17:37:29 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/22 20:26:12 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ private:
   std::string _nickName;
   std::string _userName;
   std::string _hostName;
+  std::string _password;
   int _fd;
   time_t _userTime;
 
@@ -33,6 +34,7 @@ public:
   void setNickName(std::string nickName);
   void setUserName(std::string userName);
   void setHostName(std::string hostName);
+  std::string getPassword() const;
   int getFd();
   time_t userTime();
 };

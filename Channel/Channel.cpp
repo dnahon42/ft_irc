@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/21 15:57:10 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/27 13:20:06 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,35 +28,16 @@ std::string Channel::getKey() const { return (_key); }
 
 int Channel::getUserLimit() const { return (_userLimit); }
 
-bool Channel::IsHasKey() {
-  if (_hasKey)
-    return (true);
-  return (false);
-}
+bool Channel::IsHasKey() { return (_hasKey); }
 
-bool Channel::IsLimitSet() {
-  if (_limitSet)
-    return (true);
-  return (false);
-}
+bool Channel::IsLimitSet() { return (_limitSet); }
 
-bool Channel::IsInviteOnly() {
-  if (_inviteOnly)
-    return (true);
-  return (false);
-}
+bool Channel::IsInviteOnly() { return (_inviteOnly); }
 
-bool Channel::IsTopicRestricted() {
-  if (_topicRestricted)
-    return (true);
-  return (false);
-}
+bool Channel::IsTopicRestricted() { return (_topicRestricted); }
 
-bool Channel::IsHasKeyOptionK() {
-  if (_hasKeyOptionK)
-    return (true);
-  return (false);
-}
+bool Channel::OptionK() { return (_hasOptionK); }
+bool Channel::isPrivate() const { return (_isPrivate); }
 
 bool Channel::isOperator(const Client &c) {
   if (_operator.find(c.getUserName()) != _operator.end())
@@ -68,6 +49,234 @@ bool Channel::isMember(const Client &c) {
   if (_members.find(c.getUserName()) != _members.end())
     return (true);
   return (false);
+}
+void Channel::setAuthor(std::string newAuthor) { _topicAuthor = newAuthor; }
+
+void Channel::setMsgTopic(std::string newTopic) { _topic = newTopic; }
+
+Channel::TopicStatus Channel::setTopic(Client *client,
+                                       const std::string &newTopic) {
+  if (IsTopicRestricted() == true && isOperator(*client) == false)
+    return TOPIC_NEED_OP;
+
+  if (newTopic.empty())
+    return TOPIC_EMPTY;
+
+  setMsgTopic(newTopic);
+  setAuthor(client->getNickName());
+  return TOPIC_OK;
+}
+
+bool Channel::setBoolPass() { return (_hasPassword); }
+
+std::string Channel::getPassword() const { return (_passWord); }
+
+Channel::ModeStatus Channel::setPassword(Client *client,
+                                         std::string &password) {
+  if (isOperator(*client)) {
+    if (password.empty())
+      return (PASS_EMPTY);
+    _passWord = password;
+    _hasPassword = true;
+    return (PASS_SET_OK);
+  }
+  return (NOT_OPERATOR);
+}
+Channel::ModeStatus Channel::clearPassword(Client *client) {
+
+  if (!isOperator(*client))
+    return (NOT_OPERATOR);
+  if (!OptionK())
+    return (PASS_ACTIVED);
+  _passWord = "";
+  _hasPassword = false;
+  return (PASS_CLEAR);
+}
+
+Channel::LimitStatus Channel::setLimit(Client *client, int limit) {
+  if (!isOperator(*client))
+    return (LIMIT_NOT_OP);
+  if (limit <= 0)
+    return (LIMIT_INVALID);
+  _userLimit = limit;
+  _limitSet = true;
+  return (LIMIT_SET_OK);
+}
+
+Channel::LimitStatus Channel::clearLimit(Client *client) {
+  if (!isOperator(*client))
+    return (LIMIT_NOT_OP);
+  if (!IsLimitSet())
+    return (LIMIT_NOT_SET);
+  _userLimit = 0;
+  _limitSet = false;
+  return (LIMIT_UNSET_OK);
+}
+
+Channel::JoinStatus Channel::canJoin(Client *client,
+                                     const std::string &password) {
+
+  if (isMember(*client))
+    return ALREADY_MEMB;
+
+  if (_inviteOnly) {
+    if (_listInvit.find(client->getUserName()) == _listInvit.end())
+      return INVIT_REQUIRED;
+  }
+
+  if (OptionK()) {
+    if (password.empty())
+      return PASSWORD_EMPTY;
+    if (password != getPassword())
+      return PASSWORD_INCORECT;
+  }
+
+  if (_limitSet && _memberCount >= _userLimit)
+    return FULL_CHANNEL;
+
+  return JOIN_OK;
+}
+
+void Channel::setTopicBool(bool status) { _topicRestricted = status; }
+
+Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
+                                      std::string &param) {
+  if (sign != '-' && sign != '+')
+    return INVALID_SIGN;
+
+  if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'l' && mode != 'o')
+    return UNKNOW_MODE;
+
+  if ((mode == 'i' || mode == 't') && !param.empty())
+    return PARAM_NOT_ALLOWED;
+
+  if (sign == '+' && (mode == 'k' || mode == 'l' || mode == 'o') &&
+      param.empty())
+    return PARAM_REQUIRED;
+
+  if (sign == '-' && mode == 'o' && param.empty())
+    return PARAM_REQUIRED;
+
+  if (sign == '-' && (mode == 'k' || mode == 'l') && !param.empty())
+    return PARAM_NOT_ALLOWED;
+
+  if (sign == '+') {
+    switch (mode) {
+
+    case 'i':
+      setPrivate(true);
+      return MODE_OK;
+
+    case 't':
+      setTopicBool(true);
+      return MODE_OK;
+
+    case 'k':
+      return setPassword(client, param);
+
+    case 'o': {
+      OperatorStatus st = setOperator(client, param);
+      if (st == OP_OK)
+        return MODE_OK;
+      if (st == OP_NOT_FOUND)
+        return NOT_OPERATOR;
+      if (st == OP_ALREADY)
+        return ALREADY_OP;
+      if (st == OP_NOT_MEMBER)
+        return MEMBER_NOT;
+      return UNKNOW_MODE;
+    }
+
+    case 'l': {
+      int limit = atoi(param.c_str());
+      LimitStatus st = setLimit(client, limit);
+      if (st == LIMIT_SET_OK)
+        return MODE_OK;
+      if (st == LIMIT_INVALID)
+        return INVALID_LIMIT;
+      if (st == LIMIT_NOT_OP)
+        return NOT_OPERATOR;
+      return UNKNOW_MODE;
+    }
+    }
+  }
+
+  if (sign == '-') {
+    switch (mode) {
+
+    case 'i':
+      setPrivate(false);
+      return MODE_OK;
+
+    case 't':
+      setTopicBool(false);
+      return MODE_OK;
+
+    case 'k':
+      return clearPassword(client);
+
+    case 'o': {
+      OperatorStatus st = clearOperator(client, param);
+      if (st == OP_OK)
+        return MODE_OK;
+      if (st == OP_NOT_FOUND)
+        return CLIENT_NOT_OP;
+      if (st == OP_NOT_OP)
+        return NOT_OPERATOR;
+      return UNKNOW_MODE;
+    }
+
+    case 'l': {
+      LimitStatus st = clearLimit(client);
+      if (st == LIMIT_UNSET_OK)
+        return MODE_OK;
+      if (st == LIMIT_NOT_OP)
+        return NOT_OPERATOR;
+      if (st == LIMIT_NOT_SET)
+        return MODE_NOT_ACTIVED;
+      return UNKNOW_MODE;
+    }
+    }
+  }
+
+  return MODE_OK;
+}
+
+void Channel::applyJoin(Client *client) {
+
+  addMember(client);
+  _memberCount++;
+  if (_isPrivate == true) {
+    listInvit::iterator i = _listInvit.find(client->getNickName());
+    if (i != _listInvit.end())
+      _listInvit.erase(client->getNickName());
+  }
+}
+Channel::OperatorStatus Channel::clearOperator(Client *client,
+                                               std::string &nick) {
+  OperatorMap::iterator i = _operator.find(client->getNickName());
+
+  if (!isOperator(*client))
+    return (OP_NOT_FOUND);
+  if (i == _operator.end()) {
+    return (OP_NOT_OP);
+  }
+  _operator.erase(i);
+  return (OP_OK);
+}
+
+Channel::OperatorStatus Channel::setOperator(Client *client,
+                                             std::string &nick) {
+  MembersMap::iterator it = _members.find(nick);
+  OperatorMap::iterator i = _operator.find(nick);
+  if (!isOperator(*client))
+    return (OP_NOT_FOUND);
+  if (it == _members.end())
+    return (OP_NOT_MEMBER);
+  if (i != _operator.end())
+    return (OP_ALREADY);
+  _operator.insert(nick);
+  return (OP_OK);
 }
 
 Channel::MemberStatus Channel::addMember(Client *client) {
@@ -84,7 +293,6 @@ Channel::MemberStatus Channel::addMember(Client *client) {
     _members[client->getNickName()] = client;
     return (MEMBER_OK);
   }
-  return (MEMBER_NOT_FOUND);
 }
 
 Channel::MemberStatus Channel::removeMember(std::string &nick) {
