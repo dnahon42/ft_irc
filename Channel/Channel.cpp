@@ -6,7 +6,7 @@
 /*   By: kiteixei <kiteixei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/27 13:20:06 by kiteixei         ###   ########.fr       */
+/*   Updated: 2025/11/27 14:19:02 by kiteixei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ bool Channel::IsInviteOnly() { return (_inviteOnly); }
 bool Channel::IsTopicRestricted() { return (_topicRestricted); }
 
 bool Channel::OptionK() { return (_hasOptionK); }
+
 bool Channel::isPrivate() const { return (_isPrivate); }
 
 bool Channel::isOperator(const Client &c) {
@@ -50,6 +51,7 @@ bool Channel::isMember(const Client &c) {
     return (true);
   return (false);
 }
+
 void Channel::setAuthor(std::string newAuthor) { _topicAuthor = newAuthor; }
 
 void Channel::setMsgTopic(std::string newTopic) { _topic = newTopic; }
@@ -73,7 +75,7 @@ std::string Channel::getPassword() const { return (_passWord); }
 
 Channel::ModeStatus Channel::setPassword(Client *client,
                                          std::string &password) {
-  if (isOperator(*client)) {
+  if (isOperator(*client) && OptionK()) {
     if (password.empty())
       return (PASS_EMPTY);
     _passWord = password;
@@ -252,9 +254,10 @@ void Channel::applyJoin(Client *client) {
       _listInvit.erase(client->getNickName());
   }
 }
+
 Channel::OperatorStatus Channel::clearOperator(Client *client,
                                                std::string &nick) {
-  OperatorMap::iterator i = _operator.find(client->getNickName());
+  OperatorMap::iterator i = _operator.find(nick);
 
   if (!isOperator(*client))
     return (OP_NOT_FOUND);
@@ -285,7 +288,7 @@ Channel::MemberStatus Channel::addMember(Client *client) {
   if (it != _members.end())
     return (MEMBER_ALREADY);
 
-  else if (_members.size() == 0) {
+  else if (_memberCount == 0) {
     _operator.insert(client->getNickName());
     _members[client->getNickName()] = client;
     return (MEMBER_OP_AUTOPROMOTE);
@@ -300,6 +303,7 @@ Channel::MemberStatus Channel::removeMember(std::string &nick) {
 
   if (it != _members.end()) {
     _members.erase(it);
+    _memberCount--;
     return (MEMBER_OK);
   }
   return (MEMBER_NOT_FOUND);
