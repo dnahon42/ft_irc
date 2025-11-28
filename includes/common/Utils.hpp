@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:03:39 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/20 21:39:41 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/28 02:10:56 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
+#include <deque>
 
 // Sockets
 #include <arpa/inet.h>

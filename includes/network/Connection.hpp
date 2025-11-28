@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 11:45:14 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/22 03:47:04 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/28 02:10:49 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,7 @@ class Connection
 	std::string _outBuf; // donnees à écrire
 	size_t _writeCursor; // position d'ecriture dans _outBuf
 	time_t _lastActivity;
-
-	void handleCommand(const std::string &line);
+	std::deque<std::string> _commandQueue;
 
 	void closeConnection();
 
@@ -43,4 +42,5 @@ class Connection
 	void enqueueResponse(const std::string &msg);
 	void processInput();
 	bool hasPendingOutput() const;
+	bool popCommand(std::string &command);
 };

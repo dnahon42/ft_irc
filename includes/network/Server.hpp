@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:56:42 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/22 05:10:15 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/23 02:52:26 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "Socket.hpp"
 
 class	Connection;
+class	Client;
+class	Channel;
 
 class Server
 {
@@ -28,12 +30,23 @@ class Server
 	PollManager _pollManager;
 
 	std::map<int, Connection *> _clients;
-
+	std::map<int, Client *> _clientsData;
+	std::map<std::string, Client *> _nickIndex;
+	std::map<std::string, Channel *> _channels;
 	bool createListenSocket();
 	void acceptNewConnections();
 
 	void handleReadable(int fd, Connection *conn);
 	void handleWritable(int fd, Connection *conn);
+
+	// Server_clients.cpp
+	Client *createClient(int fd);
+	void destroyClient(int fd);
+	Client *getClientByFd(int fd);
+	Client *getClientByNick(const std::string &nick);
+	Channel *getOrCreateChannel(const std::string &name);
+	void removeChannelIfEmpty(Channel *ch);
+	void dispatchCommand(Client *client, const std::string &line);
 
 	Server(const Server &other);
 	Server &operator=(const Server &other);

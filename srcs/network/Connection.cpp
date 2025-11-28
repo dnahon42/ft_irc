@@ -1,7 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Connection.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/22 01:26:14 by tniagolo          #+#    #+#             */
+/*   Updated: 2025/11/28 02:18:33 by tniagolo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/network/Connection.hpp"
 
 Connection::Connection(int fd) : _fd(fd), _closed(false), _inBuf(), _outBuf(),
-	_writeCursor(0), _lastActivity(std::time(nullptr))
+	_writeCursor(0), _lastActivity(std::time(NULL))
 {
 }
 
@@ -40,10 +52,11 @@ void Connection::onReadable()
 	while (true)
 	{
 		n = ::recv(_fd, buf, sizeof(buf), 0);
-		if (n > 0) // tant qu'on a quelque chose a lire, on l'ajoute dans notre buffer de lecture
+		// tant qu'on a quelque chose a lire, on l'ajoute dans notre buffer de lecture
+		if (n > 0)
 		{
 			_inBuf.append(buf, static_cast<size_t>(n));
-			_lastActivity = std::time(nullptr);
+			_lastActivity = std::time(NULL);
 		}
 		else if (n == 0) // si EOF, ca veut dire que le client a arrete le programme (irssi ferme par exemple)
 		{
@@ -80,29 +93,30 @@ void Connection::processInput()
 		// on utilise find pour savoir si l'input se termine par CRLF ou LF
 		crlf = _inBuf.find("\r\n", pos);
 		lf = _inBuf.find('\n', pos);
+		// find a bien trouve "\r\n" dans l'input, on initialise la fin de la string qu'on veut a crlf (index)
 		if (crlf != std::string::npos)
-			end = crlf; // find a bien trouve "\r\n" dnas l'input, on initialise la find de la string qu'on veut a crlf (index)
+			end = crlf;
 		else if (lf != std::string::npos)
 			end = lf;
 		else
 			break ; 
-		std::string line = _inBuf.substr(0, end); // on cree une substring qui n'aura plus le \n
-		if (!line.empty() && line.back() == '\r')
-			line.pop_back(); // on retire le \r dans le cas ou c'etait crlf
+		// on cree une substring qui n'aura plus le \n
+		std::string line = _inBuf.substr(0, end);
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1); // on retire le \r dans le cas ou c'etait crlf
 		delim_len = (crlf != std::string::npos) ? 2 : 1; // on defini la taille du delimiteur en fonction de si c'est crlf ou lf
 		_inBuf.erase(0, end + delim_len); // on clear le buffer pour la prochaine fois
-		handleCommand(line);
+		_commandQueue.push_back(line); // push notre command dans notre file d'attente
 	}
 }
 
-void Connection::handleCommand(const std::string &line)
+bool Connection::popCommand(std::string &command)
 {
-	// Placeholder behaviour: echo received line back to client prefixed
-	// with "Received: ". Replace this with actual IRC parsing/handling.
-	std::string reply = "Received: ";
-	reply += line;
-	reply += "\r\n";
-	enqueueResponse(reply);
+	if (_commandQueue.empty())
+		return (false);
+	command = _commandQueue.front();
+	_commandQueue.pop_front();
+	return (true);
 }
 
 void Connection::enqueueResponse(const std::string &msg)
@@ -127,10 +141,11 @@ void Connection::onWritable()
 	{
 		n = ::send(_fd, _outBuf.data() + _writeCursor, _outBuf.size()
 				- _writeCursor, 0);
-		if (n > 0) // tant qu'on a quelque chose a ecrire, on deplace notre curseur d'ecriture
+		// tant qu'on a quelque chose a ecrire, on deplace notre curseur d'ecriture
+		if (n > 0)
 		{
 			_writeCursor += static_cast<size_t>(n);
-			_lastActivity = std::time(nullptr);
+			_lastActivity = std::time(NULL);
 		}
 		else if (n == -1)
 		{

@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 04:45:45 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/22 04:48:58 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/28 02:44:44 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,18 @@ void Server::handleReadable(int fd, Connection *conn)
         if (conn->isClosed()) // si la connexion a ete interrompu pendant la lecture, on free
         {
             removeClient(fd);
-            return;
+            return ;
         }
+        
+        std::string line;
+        while (conn->popCommand(line))
+        {
+            Client *client = getClientByFd(fd);
+            dispatchCommand(client, line);
+            if (_clients.find(fd) == _clients.end())
+                return ;
+        }
+
         if (conn->hasPendingOutput())
             _pollManager.addEvent(fd, POLLOUT); // si en envoyant son message il a recu une reponse, alors le serveur ajoute l'event POLLOUT
     }
@@ -40,7 +50,7 @@ void Server::handleWritable(int fd, Connection *conn)
         if (conn->isClosed()) // si la connexion a ete interrompu pendant l'ecriture, on free
         {
             removeClient(fd);
-            return;
+            return ;
         }
         if (!conn->hasPendingOutput())
             _pollManager.removeEvent(fd, POLLOUT); // si le serveur a fini d'envoyer sa reponse, on retire le flag POLLOUT

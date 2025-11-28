@@ -6,12 +6,13 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 21:50:31 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/22 04:57:01 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/23 04:10:32 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/network/Server.hpp"
 #include "../../includes/network/Connection.hpp"
+#include "../../includes/common/Client.hpp"
 
 Server::Server(const std::string &address, unsigned short port) : _address(address), _port(port)
 {
@@ -21,7 +22,6 @@ Server::Server(const std::string &address, unsigned short port) : _address(addre
 
 Server::~Server()
 {
-
     if (_listenFd >= 0)
         _pollManager.remove(_listenFd);
 
@@ -116,6 +116,11 @@ void Server::addClient(int fd)
         Connection *conn = new Connection(fd);
         _clients[fd] = conn;
         _pollManager.add(fd, POLLIN);
+        
+        // Cree le client pour link la connection au client
+        Client *client = createClient(fd);
+        if (client != NULL && client->getConnection() == NULL)
+            client->setConnection(conn);
     }
     catch (const std::exception &)
     {
@@ -136,6 +141,9 @@ void Server::removeClient(int fd)
         return ;
 
     _pollManager.remove(fd);
+
+   // Supprimer le client et ensuite on delete la connection puis on close le fd
+    destroyClient(fd);
 
     std::map<int, Connection*>::iterator it = _clients.find(fd);
     if (it != _clients.end())

@@ -6,7 +6,7 @@
 /*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:43:53 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/21 19:59:56 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/24 05:47:23 by tniagolo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,30 +40,18 @@ Socket &Socket::operator=(const Socket &other)
 
 void Socket::_setNonBlocking(void)
 {
-	int	flags;
-	int	new_flags;
 	int	saved_errno;
 
 	if (_fd < 0)
 		throw std::runtime_error("Socket::_setNonBlocking: invalid fd");
-	flags = fcntl(_fd, F_GETFL, 0); // La fonction fcntl (file control) avec l'option F_GETFL permet de recuperer les flags
-	if (flags == -1)
-	{
-		// Ici si fcntl echoue, on stock la valeur de errno au moment de l'echec, pour eviter que errno soit modifier ailleurs avant le print
-		saved_errno = errno;
-		std::string msg = "fcntl(F_GETFL) failed: ";
-		throw std::runtime_error(msg + std::strerror(saved_errno));
-	}
-	if (flags & O_NONBLOCK) // Si le flag contient le flag O_NONBLOCK on return pour ne pas ajouter le flag O_NONBLOCK deja present
-		return ;
-	new_flags = flags | O_NONBLOCK; // Ajout du flag O_NONBLOCK qui permet d'eviter un coincement lors d'un syscall (comme accept) comme ca le syscall return immediatement pour eviter de bloquer le thread
-	if (fcntl(_fd, F_SETFL, new_flags) == -1)
+	// Ajout du flag O_NONBLOCK qui permet d'eviter un coincement lors d'un syscall
+	// (comme accept) comme ca le syscall return immediatement pour eviter de bloquer le thread
+	if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		saved_errno = errno;
-		std::string msg = "fcntl(F_SETFL) failed: ";
+		std::string msg = "fcntl(F_SETFL, O_NONBLOCK) failed: ";
 		throw std::runtime_error(msg + std::strerror(saved_errno));
 	}
-	// std::cerr << "Socket fd=" << _fd << " set non-blocking\n";
 }
 
 void Socket::_setReUseAddr(void)
@@ -74,8 +62,9 @@ void Socket::_setReUseAddr(void)
 	if (_fd < 0)
 		throw std::runtime_error("Socket::_setReuseAddr: invalid fd");
 	opt = 1;
+	// On utilise la fonction setsockopt (set socket option) pour utiliser l'option SO_REUSEADDR, qui permet de bind sur un port qui etait precedemment utilise
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (const void *)&opt,
-			(sizeof(opt))) == -1) // On utilise la fonction setsockopt (set socket option) pour utiliser l'option SO_REUSEADDR, qui permet de bind sur un port qui etait precedemment utilise
+			(sizeof(opt))) == -1) // (exemple : ca permet de relancer le serveur directement apres avoir fait ctrl + C donc sans attendre la fin du TIME_WAIT)
 	{
 		saved_errno = errno;
 		std::string msg = "setsockopt(SO_REUSEADDR) failed: ";
@@ -87,7 +76,7 @@ void Socket::create(void)
 {
 	int	saved_errno;
 
-	_fd = socket(AF_INET, SOCK_STREAM, 0); // On defini le fd avec un appel a socket qui prend en parametre le type d'ip (ipv4), le 2eme parametre etant le SOCKET TCP, et le 3eme c'est le protocole (TCP ici) 
+	_fd = socket(AF_INET, SOCK_STREAM, 0); // On defini le fd avec un appel a socket qui prend en parametre le type d'ip (ipv4), le 2eme parametre etant le SOCKET TCP, et le 3eme c'est le protocole (ici il est defini par defaut donc TCP car SOCK_STREAM) 
 	if (_fd == -1)
 	{
 		saved_errno = errno;
@@ -106,7 +95,7 @@ void Socket::bind(void)
 
 	if (_fd < 0)
 		throw std::runtime_error("Socket::bind: invalid fd");
-	if (::bind(_fd, (struct sockaddr *)&_address, sizeof(_address)) == -1) // On donne l'adresse de la structure qui contient le port, si c'est une ipv4 ou ipv6 et l'adresse a ecouter
+	if (::bind(_fd, (struct sockaddr *)&_address, sizeof(_address)) == -1) // Associe le socket sur TOUTES les interfaces de la machine
 	{
 		saved_errno = errno;
 		::close(_fd);
@@ -138,9 +127,7 @@ int Socket::accept(void)
 	struct sockaddr_in	clientAddr;
 	socklen_t			clientLen;
 	int					clientFd;
-	int					flags;
 	int					saved_errno;
-	int					fdflags;
 
 	if (_fd < 0)
 		throw std::runtime_error("Socket::accept: invalid fd");
@@ -151,24 +138,13 @@ int Socket::accept(void)
 	// Lorsque le serveur recoit une nouvelle connexion, il va l'intercepter et ouvrir un nouveau socket (FD) pour le client
 	if (clientFd == -1)
 		return (-1); // Si accept echoue, on return donc -1 qui signifie que le socket est invalide
-	// Ici on va redefinir les flags pour le socket du client donc en ajoutant le flag non bloquant
-	flags = ::fcntl(clientFd, F_GETFL, 0);
-	if (flags == -1)
+	// Rendre le socket client non-bloquant
+	if (::fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		saved_errno = errno;
 		::close(clientFd);
 		errno = saved_errno; // on save le errno pour la fonction qui appellera Socket::accept
 		return (-1);
-	}
-	if (!(flags & O_NONBLOCK))
-	{
-		if (::fcntl(clientFd, F_SETFL, flags | O_NONBLOCK) == -1)
-		{
-			saved_errno = errno;
-			::close(clientFd);
-			errno = saved_errno; // on save le errno pour la fonction qui appellera Socket::accept
-			return (-1);
-		}
 	}
 	return (clientFd);
 }
