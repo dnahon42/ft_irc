@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server_clients.cpp                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/12/05 16:27:11 by dnahon            #+#    #+#             */
+/*   Updated: 2025/12/05 17:39:02 by dnahon           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/common/Channel.hpp"
 #include "../../includes/common/Client.hpp"
 #include "../../includes/network/Connection.hpp"
@@ -91,12 +103,12 @@ void Server::dispatchCommand(Client *client, const std::string &line)
 		}
 		else if (commandName == "NICK")
 		{
-			handleNickCommand(client, cmd);
+			handleNickCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "USER")
 		{
-			handleUserCommand(client, cmd);
+			handleUserCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "PASS")
@@ -106,37 +118,47 @@ void Server::dispatchCommand(Client *client, const std::string &line)
 		}
 		else if (commandName == "QUIT")
 		{
-			handleQuitCommand(client, cmd);
+			handleQuitCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "JOIN")
 		{
-			handleJoinCommand(client, cmd);
+			handleJoinCommand(this, client, cmd);
+			handled = true;
+		}
+		else if (commandName == "PART")
+		{
+			handlePartCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "PRIVMSG")
 		{
-			handlePrivmsgCommand(client, cmd);
+			handlePrivmsgCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "KICK")
 		{
-			handleKickCommand(client, cmd);
+			handleKickCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "INVITE")
 		{
-			handleInviteCommand(client, cmd);
+			handleInviteCommand(this,client, cmd);
 			handled = true;
 		}
 		else if (commandName == "TOPIC")
 		{
-			handleTopicCommand(client, cmd);
+			handleTopicCommand(this, client, cmd);
 			handled = true;
 		}
 		else if (commandName == "MODE")
 		{
-			handleModeCommand(client, cmd);
+			handleModeCommand(this, client, cmd);
+			handled = true;
+		}
+		else if (commandName == "NOTICE")
+		{
+			handleNoticeCommand(this, client, cmd);
 			handled = true;
 		}
 	}
@@ -178,4 +200,27 @@ Channel *Server::getOrCreateChannel(const std::string &name)
 	Channel *newChannel = new Channel(name);
 	_channels[name] = newChannel;
 	return (newChannel);
+}
+
+Channel *Server::getChannel(const std::string &name)
+{
+	std::map<std::string, Channel *>::iterator it = _channels.find(name);
+	if (it != _channels.end())
+		return (it->second);
+	return (NULL);
+}
+
+void Server::updateClientNick(Client *client, const std::string &newNick)
+{
+	if (client == NULL)
+		return ;
+	
+	std::string oldNick = client->getNickName();
+	if (!oldNick.empty())
+	{
+		std::map<std::string, Client *>::iterator it = _nickIndex.find(oldNick);
+		if (it != _nickIndex.end())
+			_nickIndex.erase(it);
+	}
+	_nickIndex[newNick] = client;
 }

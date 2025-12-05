@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 10:45:59 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/28 04:15:41 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/05 19:42:36 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CHANELL_HPP
-#define CHANELL_HPP
+#ifndef CHANNEL_HPP
+#define CHANNEL_HPP
 
 #include "../../includes/common/Client.hpp"
 #include <iostream>
@@ -33,32 +33,27 @@ private:
   std::string _topicAuthor;
   time_t _topicTimestamp;
   std::string _passWord;
-  std::string _key;
 
   int _memberCount;
   int _userLimit;
-  bool _isPrivate;
-  bool _hasKey;
   bool _limitSet;
   bool _inviteOnly;
   bool _topicRestricted;
   bool _hasPassword;
-  bool _hasOptionK;
   MembersMap _members;
   OperatorMap _operator;
   listInvit _listInvit;
 
 public:
-  Channel();
-  // Channel(const std::string &name); on veut remplacer le constructeur par defaut par ca car on doit pouvoir donner un nom a la creation du channel
+  Channel(const std::string &name);
   ~Channel();
 
   std::string getName() const;
   int getMemberCount() const; // on a rajoute ca car lorsque ca atteint 0 on doit supprimer le channel
   std::string getTopic() const;
   std::string getTopicAuthor() const;
-  std::string getKey() const;
   std::string getPassword() const;
+  const MembersMap &getMembers() const; // on a rajoute
 
   time_t getTopicTimesStamp() const;
   
@@ -66,15 +61,13 @@ public:
   
   void applyJoin(Client *client);
 
-  bool IsHasKey();
   bool IsLimitSet();
   bool IsInviteOnly();
   bool IsTopicRestricted();
-  bool OptionK();
+  bool hasPassword();
   bool isOperator(const Client &c);
   bool isMember(const Client &c);
-  bool isPrivate() const;
-  void setPrivate(bool status);
+  void setInviteOnly(bool status);
   void setAuthor(std::string newAuthor);
   void setMsgTopic(std::string newTopic);
   void setTopicBool(bool status);
@@ -120,7 +113,7 @@ public:
     NOT_MEMBER,
     OP_OK,
     OP_ALREADY,
-    OP_NOT_FOUND,
+    OP_NOT_FOUND, 
     OP_REMOVE_OK,
     OP_NOT_OP,
     OP_NOT_MEMBER
@@ -162,7 +155,7 @@ public:
   OperatorStatus removeOperator(Client *client);
 
   MemberStatus addMember(Client *client);
-  MemberStatus removeMember(std::string &nick);
+  MemberStatus removeMember(const std::string &nick);
 };
 std::ostream &operator<<(std::ostream &os, const Channel &s);
 #endif

@@ -14,7 +14,7 @@
 #include "../../includes/network/Connection.hpp"
 #include "../../includes/common/Client.hpp"
 
-Server::Server(const std::string &address, unsigned short port) : _address(address), _port(port)
+Server::Server(const std::string &address, unsigned short port, const std::string &password) : _address(address), _port(port), _password(password)
 {
     _listenSocket = NULL;
     _listenFd = -1; // On ecoute rien par defaut
@@ -55,6 +55,12 @@ void Server::run(int poll_timeout_ms)
         return;
     while (true)
     {
+        for (std::map<int, Connection*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+        {
+            if (it->second && it->second->hasPendingOutput())
+                _pollManager.addEvent(it->first, POLLOUT);
+        }
+
         int ready = _pollManager.pollOnce(poll_timeout_ms);
         if (ready < 0)
         {
@@ -233,4 +239,9 @@ int Server::getListenFd(void) const
 PollManager &Server::getPollManager()
 {
     return (_pollManager);
+}
+
+std::string Server::getPassword() const
+{
+    return (_password);
 }

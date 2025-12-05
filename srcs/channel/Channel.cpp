@@ -3,23 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/11/28 04:16:52 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/05 20:22:48 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/common/Channel.hpp"
 
-Channel::Channel() {}
-
-// Channel::Channel(const std::string &name)
-//     : _name(name), _topic(""), _topicAuthor(""), _topicTimestamp(0),
-//       _passWord(""), _key(""), _memberCount(0), _userLimit(0),
-//       _isPrivate(false), _hasKey(false), _limitSet(false), _inviteOnly(false),
-//       _topicRestricted(false), _hasPassword(false), _hasOptionK(false) {} 
-//on a ajoute ca (decommente si tu veux le garder)
+Channel::Channel(const std::string &name)
+    : _name(name), _topic(""), _topicAuthor(""), _topicTimestamp(0),
+      _passWord(""), _memberCount(0), _userLimit(0),
+      _limitSet(false), _inviteOnly(false),
+      _topicRestricted(false), _hasPassword(false){} 
 
 Channel::~Channel() {}
 
@@ -33,11 +30,12 @@ std::string Channel::getTopicAuthor() const { return (_topicAuthor); }
 
 time_t Channel::getTopicTimesStamp() const { return (_topicTimestamp); }
 
-std::string Channel::getKey() const { return (_key); }
+
+std::string Channel::getPassword() const { return (_passWord); } // rajoute
+
+const MembersMap &Channel::getMembers() const { return (_members); } // rajoute
 
 int Channel::getUserLimit() const { return (_userLimit); }
-
-bool Channel::IsHasKey() { return (_hasKey); }
 
 bool Channel::IsLimitSet() { return (_limitSet); }
 
@@ -45,23 +43,23 @@ bool Channel::IsInviteOnly() { return (_inviteOnly); }
 
 bool Channel::IsTopicRestricted() { return (_topicRestricted); }
 
-bool Channel::OptionK() { return (_hasOptionK); }
-
-bool Channel::isPrivate() const { return (_isPrivate); }
+bool Channel::hasPassword() { return (_hasPassword); }
 
 bool Channel::isOperator(const Client &c) {
-  if (_operator.find(c.getUserName()) != _operator.end())
+  if (_operator.find(c.getNickName()) != _operator.end())
     return (true);
   return (false);
 }
 
 bool Channel::isMember(const Client &c) {
-  if (_members.find(c.getUserName()) != _members.end())
+  if (_members.find(c.getNickName()) != _members.end())
     return (true);
   return (false);
 }
 
 void Channel::setAuthor(std::string newAuthor) { _topicAuthor = newAuthor; }
+
+void Channel::setInviteOnly(bool status) { _inviteOnly = status; }
 
 void Channel::setMsgTopic(std::string newTopic) { _topic = newTopic; }
 
@@ -80,24 +78,23 @@ Channel::TopicStatus Channel::setTopic(Client *client,
 
 bool Channel::setBoolPass() { return (_hasPassword); }
 
-std::string Channel::getPassword() const { return (_passWord); }
-
 Channel::ModeStatus Channel::setPassword(Client *client,
                                          std::string &password) {
-  if (isOperator(*client) && OptionK()) {
-    if (password.empty())
-      return (PASS_EMPTY);
-    _passWord = password;
-    _hasPassword = true;
-    return (PASS_SET_OK);
-  }
-  return (NOT_OPERATOR);
+  if (!isOperator(*client))
+    return (NOT_OPERATOR);
+  if (hasPassword())
+    return (PASS_ACTIVED);
+  if (password.empty())
+    return (PASS_EMPTY);
+  _passWord = password;
+  _hasPassword = true;
+  return (PASS_SET_OK);
 }
 Channel::ModeStatus Channel::clearPassword(Client *client) {
 
   if (!isOperator(*client))
     return (NOT_OPERATOR);
-  if (!OptionK())
+  if (!hasPassword())
     return (PASS_ACTIVED);
   _passWord = "";
   _hasPassword = false;
@@ -131,11 +128,11 @@ Channel::JoinStatus Channel::canJoin(Client *client,
     return ALREADY_MEMB;
 
   if (_inviteOnly) {
-    if (_listInvit.find(client->getUserName()) == _listInvit.end())
+    if (_listInvit.find(client->getNickName()) == _listInvit.end())
       return INVIT_REQUIRED;
   }
 
-  if (OptionK()) {
+  if (hasPassword()) {
     if (password.empty())
       return PASSWORD_EMPTY;
     if (password != getPassword())
@@ -175,7 +172,7 @@ Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
     switch (mode) {
 
     case 'i':
-      setPrivate(true);
+      setInviteOnly(true);
       return MODE_OK;
 
     case 't':
@@ -216,7 +213,7 @@ Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
     switch (mode) {
 
     case 'i':
-      setPrivate(false);
+      setInviteOnly(false);
       return MODE_OK;
 
     case 't':
@@ -256,8 +253,7 @@ Channel::ModeStatus Channel::applyMod(Client *client, char sign, char mode,
 void Channel::applyJoin(Client *client) {
 
   addMember(client);
-  _memberCount++;
-  if (_isPrivate == true) {
+  if (_inviteOnly == true) {
     listInvit::iterator i = _listInvit.find(client->getNickName());
     if (i != _listInvit.end())
       _listInvit.erase(client->getNickName());
@@ -300,18 +296,23 @@ Channel::MemberStatus Channel::addMember(Client *client) {
   else if (_memberCount == 0) {
     _operator.insert(client->getNickName());
     _members[client->getNickName()] = client;
+    _memberCount++;
     return (MEMBER_OP_AUTOPROMOTE);
   } else {
     _members[client->getNickName()] = client;
+    _memberCount++;
     return (MEMBER_OK);
   }
 }
 
-Channel::MemberStatus Channel::removeMember(std::string &nick) {
+Channel::MemberStatus Channel:: removeMember(const std::string &nick) {
   MembersMap::iterator it = _members.find(nick);
 
   if (it != _members.end()) {
+    bool wasOperator = (_operator.find(nick) != _operator.end());
+
     _members.erase(it);
+    _operator.erase(nick);
     _memberCount--;
     return (MEMBER_OK);
   }
@@ -332,7 +333,7 @@ Channel::OperatorStatus Channel::addOperator(Client *client) {
 
 Channel::OperatorStatus Channel::removeOperator(Client *client) {
   if (isOperator(*client) == true) {
-    _operator.erase(_operator.find(client->getUserName()));
+    _operator.erase(_operator.find(client->getNickName()));
     return (OP_OK);
   }
   return (OP_NOT_FOUND);
@@ -340,7 +341,7 @@ Channel::OperatorStatus Channel::removeOperator(Client *client) {
 
 Channel::InvitedStatus Channel::addInvit(Client *client) {
 
-  listInvit::iterator it = _listInvit.find(client->getUserName());
+  listInvit::iterator it = _listInvit.find(client->getNickName());
 
   if (it != _listInvit.end())
     return (INVITE_ALREADY);
@@ -364,7 +365,7 @@ Channel::InvitedStatus Channel::removeInvit(std::string &nick) {
 
 std::ostream &operator<<(std::ostream &os, const Channel &s) {
   os << s.getName();
-  os << s.getKey();
+  os << s.getPassword();
   os << s.getTopic();
   os << s.getUserLimit();
   os << s.getTopicTimesStamp();

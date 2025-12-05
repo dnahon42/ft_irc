@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 14:56:42 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/23 02:52:26 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/11/29 05:42:19 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Server
   private:
 	std::string _address;
 	unsigned short _port;
+	std::string _password;
 
 	Socket *_listenSocket;
 	int _listenFd;
@@ -42,25 +43,28 @@ class Server
 	// Server_clients.cpp
 	Client *createClient(int fd);
 	void destroyClient(int fd);
-	Client *getClientByFd(int fd);
-	Client *getClientByNick(const std::string &nick);
-	Channel *getOrCreateChannel(const std::string &name);
-	void removeChannelIfEmpty(Channel *ch);
 	void dispatchCommand(Client *client, const std::string &line);
 
 	Server(const Server &other);
 	Server &operator=(const Server &other);
 
   public:
-	Server(const std::string &address, unsigned short port);
+	Server(const std::string &address, unsigned short port, const std::string &password);
 	~Server();
 
 	bool init();
 	void run(int poll_timeout_ms = -1);
 
 	int getListenFd() const;
+	std::string getPassword() const;
 	PollManager &getPollManager();
 
 	void addClient(int fd);
 	void removeClient(int fd);
+	void updateClientNick(Client *client, const std::string &newNick);
+	void removeChannelIfEmpty(Channel *ch);
+	Client *getClientByFd(int fd);
+	Client *getClientByNick(const std::string &nick);
+	Channel *getOrCreateChannel(const std::string &name);
+	Channel *getChannel(const std::string &name);
 };

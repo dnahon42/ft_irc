@@ -22,6 +22,7 @@ class Client
   private:
 	std::string _nickName;
 	std::string _userName;
+	std::string _realName;
 	std::string _hostName;
 	std::string _password;
 	int _fd;
@@ -32,12 +33,13 @@ class Client
 	std::set<Channel *> _channels;
 
   public:
-	Client(int fd) : _nickName(""), _userName(""), _hostName(""), _fd(fd),
+	Client(int fd) : _nickName(""), _userName(""), _realName(""), _hostName(""), _fd(fd),
 		_userTime(0), _registered(false), _connection(NULL){};
 	~Client(){};
 
 	std::string getNickName() const;
 	std::string getUserName() const;
+	std::string getRealName() const;
 	std::string getHostName() const;
 	std::string getPassword() const;
 	int getFd() const;
@@ -45,6 +47,7 @@ class Client
 
 	void setNickName(const std::string &nickName);
 	void setUserName(const std::string &userName);
+	void setRealName(const std::string &realName);
 	void setHostName(const std::string &hostName);
 	void setPassword(const std::string &password);
 

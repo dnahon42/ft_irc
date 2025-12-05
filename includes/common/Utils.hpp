@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:03:39 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/28 02:10:56 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/05 13:18:06 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <map>
 #include <sstream>
 #include <stdexcept>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <memory>

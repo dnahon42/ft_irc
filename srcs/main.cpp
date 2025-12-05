@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: copilot <copilot@example.com>               +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/23 05:00:00 by copilot           #+#    #+#             */
-/*   Updated: 2025/11/23 05:00:00 by copilot          ###   ########.fr       */
+/*   Created: 2025/12/05 16:27:51 by dnahon            #+#    #+#             */
+/*   Updated: 2025/12/05 16:27:57 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/network/Server.hpp"
-#include <iostream>
-#include <cstdlib>
 
 int main(int argc, char **argv)
 {
@@ -25,7 +23,7 @@ int main(int argc, char **argv)
 	unsigned short port = static_cast<unsigned short>(std::atoi(argv[1]));
 	std::string password = argv[2];
 
-	Server server("127.0.0.1", port);
+	Server server("127.0.0.1", port, password);
 
 	if (!server.init())
 	{
