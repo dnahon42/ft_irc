@@ -3,18 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Server_init.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 21:50:31 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/23 04:10:32 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/06 14:52:27 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/network/Server.hpp"
 #include "../../includes/network/Connection.hpp"
 #include "../../includes/common/Client.hpp"
+#include "../../includes/common/Channel.hpp"
 
-Server::Server(const std::string &address, unsigned short port, const std::string &password) : _address(address), _port(port), _password(password)
+Server::Server(const std::string &address, unsigned short port, const std::string &password) : _address(address), _port(port), _password(password), _running(false)
 {
     _listenSocket = NULL;
     _listenFd = -1; // On ecoute rien par defaut
@@ -25,6 +26,16 @@ Server::~Server()
     if (_listenFd >= 0)
         _pollManager.remove(_listenFd);
 
+    // Free tous les clients
+    for (std::map<int, Client*>::iterator it = _clientsData.begin();
+         it != _clientsData.end(); ++it)
+    {
+        delete it->second;
+    }
+    _clientsData.clear();
+    _nickIndex.clear();
+
+    // Free les connections
     for (std::map<int, Connection*>::iterator it = _clients.begin();
          it != _clients.end(); ++it)
     {
@@ -32,8 +43,18 @@ Server::~Server()
     }
     _clients.clear();
 
+    // Free les channels
+    for (std::map<std::string, Channel*>::iterator it = _channels.begin();
+         it != _channels.end(); ++it)
+    {
+        delete it->second;
+    }
+    _channels.clear();
+
+    // Free les sockets
     if (_listenSocket != NULL)
     {
+        _listenSocket->close();
         delete _listenSocket;
         _listenSocket = NULL;
         _listenFd = -1;
@@ -53,7 +74,8 @@ void Server::run(int poll_timeout_ms)
 {
     if (_listenFd < 0)
         return;
-    while (true)
+    _running = true;
+    while (_running)
     {
         for (std::map<int, Connection*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
         {
@@ -244,4 +266,9 @@ PollManager &Server::getPollManager()
 std::string Server::getPassword() const
 {
     return (_password);
+}
+
+void Server::stop()
+{
+    _running = false;
 }

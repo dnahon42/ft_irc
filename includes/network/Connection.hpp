@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 11:45:14 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/28 02:10:49 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/06 14:14:13 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ class Connection
 	std::string _inBuf;  // donnees lues mais non encore traitees
 	std::string _outBuf; // donnees à écrire
 	size_t _writeCursor; // position d'ecriture dans _outBuf
-	time_t _lastActivity;
 	std::deque<std::string> _commandQueue;
 
 	void closeConnection();

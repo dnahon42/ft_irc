@@ -29,6 +29,7 @@ class Server
 	Socket *_listenSocket;
 	int _listenFd;
 	PollManager _pollManager;
+	bool _running;
 
 	std::map<int, Connection *> _clients;
 	std::map<int, Client *> _clientsData;
@@ -67,4 +68,5 @@ class Server
 	Client *getClientByNick(const std::string &nick);
 	Channel *getOrCreateChannel(const std::string &name);
 	Channel *getChannel(const std::string &name);
+	void stop();
 };

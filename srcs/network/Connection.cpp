@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tniagolo <tniagolo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 01:26:14 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/11/28 02:18:33 by tniagolo         ###   ########.fr       */
+/*   Updated: 2025/12/06 15:09:27 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/network/Connection.hpp"
 
 Connection::Connection(int fd) : _fd(fd), _closed(false), _inBuf(), _outBuf(),
-	_writeCursor(0), _lastActivity(std::time(NULL))
+	_writeCursor(0)
 {
 }
 
@@ -56,7 +56,6 @@ void Connection::onReadable()
 		if (n > 0)
 		{
 			_inBuf.append(buf, static_cast<size_t>(n));
-			_lastActivity = std::time(NULL);
 		}
 		else if (n == 0) // si EOF, ca veut dire que le client a arrete le programme (irssi ferme par exemple)
 		{
@@ -145,7 +144,6 @@ void Connection::onWritable()
 		if (n > 0)
 		{
 			_writeCursor += static_cast<size_t>(n);
-			_lastActivity = std::time(NULL);
 		}
 		else if (n == -1)
 		{

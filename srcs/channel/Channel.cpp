@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/19 12:45:55 by kiteixei          #+#    #+#             */
-/*   Updated: 2025/12/05 20:22:48 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/06 14:35:30 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,15 +305,19 @@ Channel::MemberStatus Channel::addMember(Client *client) {
   }
 }
 
-Channel::MemberStatus Channel:: removeMember(const std::string &nick) {
+Channel::MemberStatus Channel:: removeMember(const std::string &nick)
+{
   MembersMap::iterator it = _members.find(nick);
 
   if (it != _members.end()) {
-    bool wasOperator = (_operator.find(nick) != _operator.end());
-
     _members.erase(it);
     _operator.erase(nick);
     _memberCount--;
+    if (_memberCount == 1)
+    {
+      MembersMap::iterator remaining = _members.begin();
+      _operator.insert(remaining->first);
+    }
     return (MEMBER_OK);
   }
   return (MEMBER_NOT_FOUND);

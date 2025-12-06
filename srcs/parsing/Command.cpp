@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 02:13:57 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/05 19:39:31 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/06 14:23:01 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ static bool isValidNickname(const std::string &nick)
 	std::string special = "[]\\`_^{}|-";
 	for (size_t i = 0; i < nick.length(); ++i)
 	{
-		if (!isalnum(nick[i]) && special.find(nick[i]) == std::string::npos)
+		if (!isalnum(nick[i]) && special.find(nick[i]) != std::string::npos)
 			return (false);
 	}
 	return (true);
@@ -96,7 +96,7 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
 	}
 
 	// Verifie si le nickname est deja utilise par un autre client
-	if (server->getClientByNick(nick) != NULL)
+	if (server->getClientByNick(nick) != NULL && client->getNickName() != nick)
 	{
 		client->sendMessage(":localhost " ERR_NICKNAMEINUSE " " + client->getNickName() + " " + nick + " :Nickname is already in use\r\n");
 		return ;
@@ -296,7 +296,7 @@ void handleJoinCommand(Server *server, Client *client, Command cmd)
         {
             if (status == Channel::INVIT_REQUIRED)
                 client->sendMessage(":localhost " ERR_INVITEONLYCHAN " " + client->getNickName() + " " + channelName + " :Cannot join channel (+i)\r\n");
-            else if (status == Channel::PASSWORD_INCORECT)
+            else if (status == Channel::PASSWORD_INCORECT || status == Channel::PASSWORD_EMPTY)
                 client->sendMessage(":localhost " ERR_BADCHANNELKEY " " + client->getNickName() + " " + channelName + " :Cannot join channel (+k)\r\n");
             else if (status == Channel::FULL_CHANNEL)
                 client->sendMessage(":localhost " ERR_CHANNELISFULL " " + client->getNickName() + " " + channelName + " :Cannot join channel (+l)\r\n");

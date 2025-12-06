@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:03:39 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/05 13:18:06 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/06 14:56:23 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@
 
 // Signaux
 #include <signal.h>
+#include <csignal>
 
 // Time
 #include <ctime>
