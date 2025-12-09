@@ -331,7 +331,7 @@ Channel::OperatorStatus Channel::removeOperator(Client *client) {
 
 Channel::InvitedStatus Channel::addInvit(Client *client) {
 
-  listInvit::iterator it = _listInvit.find(client->getUserName());
+  listInvit::iterator it = _listInvit.find(client->getNickName());
 
   if (it != _listInvit.end())
     return (INVITE_ALREADY);
