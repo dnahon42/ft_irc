@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 02:13:57 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/06 14:23:01 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/08 14:07:56 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
             	return;
         	}
 			client->setRegistered(true);
-			client->sendMessage(":localhost " RPL_WELCOME " " + nick + " :Welcome to the FT_IRC Network " + nick + "\r\n");
+			client->sendMessage(":localhost " RPL_WELCOME " " + nick + " :Welcome to the FT_TELEGRAM Network " + nick + "\r\n");
 		}
 	}
 }
@@ -173,7 +173,7 @@ void handleUserCommand(Server *server, Client *client, Command cmd)
             return;
         }
 		client->setRegistered(true);
-		client->sendMessage(":localhost " RPL_WELCOME " " + client->getNickName() + " :Welcome to the FT_IRC Network " + client->getNickName() + "\r\n");
+		client->sendMessage(":localhost " RPL_WELCOME " " + client->getNickName() + " :Welcome to the FT_TELEGRAM Network " + client->getNickName() + "\r\n");
 	}
 }
 
@@ -318,7 +318,7 @@ void handlePartCommand(Server *server, Client *client, Command cmd)
         std::string channelName = channels[i];
 		Channel *channel = server->getChannel(channelName);
 		if (!channel)
-            client->sendMessage(":localhost " ERR_NOSUCHCHANNEL " " + client->getNickName() + " " + channelName + " :No such channel\r\n");
+            client->sendMessage(":localhost " ERR_NOSUCHCHANNEL " " + client->getNickName() + " " + channelName + " :No such channel1\r\n");
 		else
 		{
 			if (channel->removeMember(client->getNickName()) == Channel::MEMBER_NOT_FOUND)
@@ -594,8 +594,6 @@ void handleNoticeCommand(Server *server, Client *client, Command cmd)//meme chos
         }
     }
 }
-
-//    RPL_BANLIST                     RPL_ENDOFBANLIST
 
 void handleModeCommand(Server *server, Client *client, Command cmd)
 {

@@ -6,38 +6,19 @@
 #    By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/20 14:42:46 by dnahon            #+#    #+#              #
-#    Updated: 2025/12/08 13:52:34 by dnahon           ###   ########.fr        #
+#    Updated: 2025/12/09 20:43:50 by dnahon           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME        =   ircserv
+NAME        =   ircbot
 CC          =   c++
 CPPFLAGS    =   -g3 -Wall -Wextra -Werror -Wshadow -std=c++98
 
 RM          =   rm -f
 
-SRC         =   srcs/main.cpp \
-				srcs/channel/Channel.cpp \
-				srcs/common/Client.cpp \
-				srcs/network/Connection.cpp \
-				srcs/network/PollManager.cpp \
-				srcs/network/Server_clients.cpp \
-				srcs/network/Server_init.cpp \
-				srcs/network/Server_io.cpp \
-				srcs/network/Socket.cpp \
-				srcs/parsing/Command.cpp \
-				srcs/parsing/Parser.cpp
+SRC         =   srcs/bot.cpp \
 
-INCLUDES    =   includes/ft_irc.hpp \
-				includes/common/Channel.hpp \
-				includes/common/Client.hpp \
-				includes/common/Utils.hpp \
-				includes/network/Connection.hpp \
-				includes/network/PollManager.hpp \
-				includes/network/Server.hpp \
-				includes/network/Socket.hpp \
-				includes/parsing/Command.hpp \
-				includes/parsing/Parser.hpp
+INCLUDES    =	includes/bot.hpp \
 
 OBJ         =   $(SRC:.cpp=.o)
 

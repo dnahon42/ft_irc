@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 01:26:14 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/06 15:09:27 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/09 21:20:34 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,8 @@ void Connection::processInput()
 		delim_len = (crlf != std::string::npos) ? 2 : 1; // on defini la taille du delimiteur en fonction de si c'est crlf ou lf
 		_inBuf.erase(0, end + delim_len); // on clear le buffer pour la prochaine fois
 		_commandQueue.push_back(line); // push notre command dans notre file d'attente
+		
+		std::cout << "Server received an input : " + line << std::endl;
 	}
 }
 

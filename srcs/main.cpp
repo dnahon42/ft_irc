@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 16:27:51 by dnahon            #+#    #+#             */
-/*   Updated: 2025/12/06 15:01:17 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/08 16:43:05 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ int main(int ac, char **av)
 	std::cout << "Server listening on port " << port << std::endl;
 	std::cout << "Password: " << password << std::endl;
 
-	// Run with 100ms timeout to allow checking for signals
 	server.run(100);
 
 	std::cout << "\nServer shutting down gracefully..." << std::endl;
