@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 20:43:56 by dnahon            #+#    #+#             */
-/*   Updated: 2025/12/10 14:58:57 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/10 18:17:54 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,14 +113,14 @@ int	main(int ac, char **av)
                     channelSentTo = part;
                 if (ss >> part)
                 {
-                    if (part == ":quoi")
+                    std::string test = "quoi";
+                    if (message.find(test, message.size() - 6) != std::string::npos)
                     {
                         std::string response = "PRIVMSG " + channelSentTo + " coubeh\r\n";
 		                ::send(fd, response.data(), response.size(), 0);
                     }
                 }
-            }
-                
+            }     
         }
         close(fd);
 	}
