@@ -6,11 +6,13 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 20:43:56 by dnahon            #+#    #+#             */
-/*   Updated: 2025/12/09 22:19:47 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/10 14:58:57 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/bot.hpp"
+
+static int g_fd = 0;
 
 static std::vector<std::string> split(const std::string &s, char delimiter)
 {
@@ -20,6 +22,13 @@ static std::vector<std::string> split(const std::string &s, char delimiter)
     while (std::getline(tokenStream, token, delimiter))
         tokens.push_back(token);
     return tokens;
+}
+
+void signalHandler(int signum)
+{
+	(void)signum;
+	if (g_fd)
+        close(g_fd);
 }
 
 int	main(int ac, char **av)
@@ -62,6 +71,8 @@ int	main(int ac, char **av)
             std::string msg = "socket() failed: ";
             throw std::runtime_error(msg + std::strerror(saved_errno));
         }
+        g_fd = fd;
+	    signal(SIGINT, signalHandler);
 		if (::connect(fd, (struct sockaddr *)&botaddress, sizeof(botaddress)) ==
 			-1)
 		{
@@ -111,6 +122,7 @@ int	main(int ac, char **av)
             }
                 
         }
+        close(fd);
 	}
     catch (std::exception &e)
     {
