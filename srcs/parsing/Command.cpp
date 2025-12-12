@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 02:13:57 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/12 01:06:05 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/12 18:11:07 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,8 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
 		{
 			if (server->getPassword() != client->getPassword())
         	{
-            	client->sendMessage(":localhost " ERR_PASSWDMISMATCH " " + client->getNickName() + " :Password incorrect\r\n");
+		        std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
+            	client->sendMessage(":localhost " ERR_PASSWDMISMATCH " " + currentNick + " :Password incorrect\r\n");
             	return;
         	}
 			client->setRegistered(true);
@@ -151,15 +152,16 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
 
 void handleUserCommand(Server *server, Client *client, Command cmd)
 {
+    std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
 	if (client->isRegistered())
 	{
-		client->sendMessage(":localhost " ERR_ALREADYREGISTRED " " + client->getNickName() + " :Unauthorized command (already registered)\r\n");
+		client->sendMessage(":localhost " ERR_ALREADYREGISTRED " " + currentNick + " :Unauthorized command (already registered)\r\n");
 		return ;
 	}
 
 	if (cmd.getParams().size() < 4)
 	{
-		client->sendMessage(":localhost " ERR_NEEDMOREPARAMS " " + client->getNickName() + " USER :Not enough parameters\r\n");
+		client->sendMessage(":localhost " ERR_NEEDMOREPARAMS " " + currentNick + " USER :Not enough parameters\r\n");
 		return ;
 	}
 
@@ -172,24 +174,25 @@ void handleUserCommand(Server *server, Client *client, Command cmd)
 	{
 		if (server->getPassword() != client->getPassword())
         {
-            client->sendMessage(":localhost " ERR_PASSWDMISMATCH " " + client->getNickName() + " :Password incorrect\r\n");
+            client->sendMessage(":localhost " ERR_PASSWDMISMATCH " " + currentNick + " :Password incorrect\r\n");
             return;
         }
 		client->setRegistered(true);
-		client->sendMessage(":localhost " RPL_WELCOME " " + client->getNickName() + " :Welcome to the FT_TELEGRAM Network " + client->getNickName() + "\r\n");
+		client->sendMessage(":localhost " RPL_WELCOME " " + currentNick + " :Welcome to the FT_TELEGRAM Network " + currentNick + "\r\n");
 	}
 }
 
 void handlePassCommand(Client *client, Command cmd)
 {
+    std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
 	if (client->isRegistered())
 	{
-		client->sendMessage(":localhost " ERR_ALREADYREGISTRED " " + client->getNickName() + " :Unauthorized command (already registered)\r\n");
+		client->sendMessage(":localhost " ERR_ALREADYREGISTRED " " + currentNick + " :Unauthorized command (already registered)\r\n");
 		return ;
 	}
 	if (cmd.getParams().empty())
 	{
-		client->sendMessage(":localhost " ERR_NEEDMOREPARAMS " " + client->getNickName() + " PASS :Not enough parameters\r\n");
+		client->sendMessage(":localhost " ERR_NEEDMOREPARAMS " " + currentNick + " PASS :Not enough parameters\r\n");
 		return ;
 	}
 	client->setPassword(cmd.getParams()[0]);
