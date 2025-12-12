@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 21:50:31 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/08 16:44:10 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/12 20:07:04 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,9 @@ void Server::run(int poll_timeout_ms)
             if (revents == 0) // tant qu'aucun event s'est produit, on continue d'iterer
                 continue;
             int fd = fds[i].fd;
-
+            // POLLHUP = crash du client / ferme le terminal ou est execute le client
+            // POLLERR = Crash violent du client (coupure de courant)
+            // POLLNVAL = Si jamais poll tentes de surveiller un fd invalide
             if (revents & (POLLERR | POLLHUP | POLLNVAL)) // si erreur on enleve le client
             {
                 removeClient(fd);
