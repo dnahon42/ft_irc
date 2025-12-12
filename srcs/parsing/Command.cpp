@@ -6,7 +6,7 @@
 /*   By: dnahon <dnahon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 02:13:57 by tniagolo          #+#    #+#             */
-/*   Updated: 2025/12/08 14:07:56 by dnahon           ###   ########.fr       */
+/*   Updated: 2025/12/12 01:06:05 by dnahon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ static bool isValidNickname(const std::string &nick)
 	std::string special = "[]\\`_^{}|-";
 	for (size_t i = 0; i < nick.length(); ++i)
 	{
-		if (!isalnum(nick[i]) && special.find(nick[i]) != std::string::npos)
+		if (!isalnum(nick[i]) && special.find(nick[i]) == std::string::npos)
 			return (false);
 	}
 	return (true);
@@ -82,7 +82,8 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
 	// Verifie si un nickname a ete donne
 	if (cmd.getParams().empty())
 	{
-		client->sendMessage(":localhost " ERR_NONICKNAMEGIVEN " " + client->getNickName() + " :No nickname given\r\n");
+        std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
+		client->sendMessage(":localhost " ERR_NONICKNAMEGIVEN " " + currentNick + " :No nickname given\r\n");
 		return ;
 	}
 
@@ -91,14 +92,16 @@ void handleNickCommand(Server *server, Client *client, Command cmd)
 	// Verifie si le nickname est valide (caracteres autorises, longueur)
 	if (!isValidNickname(nick))
 	{
-		client->sendMessage(":localhost " ERR_ERRONEUSNICKNAME " " + client->getNickName() + " " + nick + " :Erroneus nickname\r\n");
+		std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
+		client->sendMessage(":localhost " ERR_ERRONEUSNICKNAME " " + currentNick + " " + nick + " :Erroneus nickname\r\n");
 		return ;
 	}
 
 	// Verifie si le nickname est deja utilise par un autre client
 	if (server->getClientByNick(nick) != NULL && client->getNickName() != nick)
 	{
-		client->sendMessage(":localhost " ERR_NICKNAMEINUSE " " + client->getNickName() + " " + nick + " :Nickname is already in use\r\n");
+		std::string currentNick = client->getNickName().empty() ? "*" : client->getNickName();
+		client->sendMessage(":localhost " ERR_NICKNAMEINUSE " " + currentNick + " " + nick + " :Nickname is already in use\r\n");
 		return ;
 	}
 
